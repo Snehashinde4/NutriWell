@@ -20,24 +20,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
-
-  
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -51,13 +47,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+  id               String             @id @default(cuid())
+  name             String?
+  email            String?            @unique
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  healthProfile    HealthProfile?
+  dietaryLogs      DietaryLog[]
+  exerciseLogs     ExerciseLog[]
+  foodEntries      FoodEntry[]
+  weightGoalLogs   WeightGoalLog[]
+  createdAt        DateTime           @default(now())
 }
 
 model VerificationToken {
@@ -66,4 +68,81 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model HealthProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age             Int
+  height          Float    // in centimeters
+  weight          Float    // in kilograms
+  gender          String?
+  activityLevel   String   // SEDENTARY, LIGHT, MODERATE, VERY_ACTIVE, EXTREMELY_ACTIVE
+  weeklyExercise  Int      // number of times per week
+  bmi             Float?   // calculated field
+  targetWeight    Float?   // target weight in kilograms
+  healthGoals     String[] // array of health goals
+  createdAt       DateTime @default(now())
+}
+
+model DietaryLog {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime  @default(now())
+  mealType    String    // BREAKFAST, LUNCH, DINNER, SNACK
+  foodItems   FoodEntry[]
+  totalCalories Int
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ExerciseLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime @default(now())
+  type         String   // CARDIO, STRENGTH, FLEXIBILITY, etc.
+  duration     Int      // in minutes
+  intensity    String   // LOW, MODERATE, HIGH
+  caloriesBurned Int?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FoodEntry {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  dietaryLogId String?
+  dietaryLog   DietaryLog? @relation(fields: [dietaryLogId], references: [id])
+  foodName     String
+  calories     Int
+  protein      Float?     // in grams
+  carbs        Float?     // in grams
+  fats         Float?     // in grams
+  imageUrl     String?
+  aiPredicted  Boolean    @default(false)
+  servingSize  String?
+  mealType     String     // BREAKFAST, LUNCH, DINNER, SNACK
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model WeightGoalLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startWeight  Float
+  targetWeight Float
+  currentWeight Float
+  goalType     String   // LOSS, GAIN, MAINTAIN
+  status       String   // IN_PROGRESS, ACHIEVED, ABANDONED
+  startDate    DateTime @default(now())
+  targetDate   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
