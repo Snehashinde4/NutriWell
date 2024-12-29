@@ -11,12 +11,12 @@ const SignIn = () => {
           Welcome back
         </h1>
         <p className="text-sm max-w-xs mx-auto text-muted-foreground">
-          By continuing, you are setting up a CoBuild account and agree to our 
+          By continuing, you are setting up a NutriWell account and agree to our 
           User agreement and Privacy Policy.
         </p>
         <UserAuthForm />
         <p className="px-8 text-center text-sm text-muted-foreground">
-          New to CoBuild?{" "}
+          New to NutriWell?{" "}
           <Link 
             href="/sign-up" 
             className="hover:text-foreground text-foreground/80 text-sm underline underline-offset-4"
