@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from "zod"
-import { HealthProfile, UpdateProfileResponse } from "@/types"
+import { UpdateProfileResponse } from "@/types"
 import { db } from "@/lib/db"
 import { getAuthSession } from "@/lib/auth/utils"
 

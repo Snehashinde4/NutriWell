@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Scale, Calculator, ChevronRight } from 'lucide-react'
+import { Loader2, Scale, } from 'lucide-react'
 import { CurrentBMI } from '@/components/CurrentBMI'
 import { BMICalculator } from '@/components/BMICalculator'
 import { BMIResult } from '@/components/BMIResult'
@@ -49,6 +49,8 @@ useEffect(() => {
   }
   fetchCurrentBMI()
 }, [session])
+
+  if(isLoading) return <Loader2 className="h-8 w-8 animate-spin text-green-500" />
 
   return (
     <MaxWidthWrapper className="py-10">

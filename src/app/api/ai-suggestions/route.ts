@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth/next"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { getAuthSession } from '@/lib/auth/utils'
 import { db } from '@/lib/db'
@@ -121,6 +120,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Helper function to calculate BMR using Mifflin-St Jeor Equation
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateBMR(profile: any) {
   const { weight, height, age, gender } = profile
   let bmr = (10 * weight) + (6.25 * height) - (5 * age)
@@ -129,6 +129,7 @@ function calculateBMR(profile: any) {
 }
 
 // Helper function to calculate average daily calories
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateAverageCalories(logs: any[]) {
   if (logs.length === 0) return 0
   const totalCalories = logs.reduce((sum, log) => sum + log.totalCalories, 0)
@@ -136,6 +137,7 @@ function calculateAverageCalories(logs: any[]) {
 }
 
 // Helper function to calculate average daily calories burned
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateAverageCaloriesBurned(logs: any[]) {
   if (logs.length === 0) return 0
   const totalCalories = logs.reduce((sum, log) => sum + (log.caloriesBurned || 0), 0)

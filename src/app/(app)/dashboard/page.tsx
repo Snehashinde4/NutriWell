@@ -184,7 +184,7 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
 
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <motion.div key={feature.title} variants={itemVariants}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>

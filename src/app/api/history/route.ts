@@ -119,6 +119,7 @@ export async function GET(req: NextRequest) {
         acc[date].exerciseLogs.push(log)
       }
       return acc
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }, {} as Record<string, any>)
 
     return NextResponse.json(Object.values(groupedLogs))

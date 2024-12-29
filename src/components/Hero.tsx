@@ -91,7 +91,7 @@ const Hero = () => {
               variants={itemVariants}
               className="mt-8 text-green-600 font-semibold text-lg text-center lg:text-left"
             >
-              "Your all-in-one nutrition and wellness companion for a healthier, happier you."
+              &quot;Your all-in-one nutrition and wellness companion for a healthier, happier you.&quot;
             </motion.p>
 
             <motion.p

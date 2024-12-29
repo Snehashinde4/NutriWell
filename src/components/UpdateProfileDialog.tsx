@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from '@/hooks/use-toast'
-import { GetProfile, UpdateProfile } from '@/app/api/actions/profile'
-import { HealthProfile } from '@prisma/client'
+import { UpdateProfile } from '@/app/api/actions/profile'
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -81,7 +80,6 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true)
-      const userData = await GetProfile()
 
       const profileData = {
         age: values.age,

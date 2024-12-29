@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import MaxWidthWrapper from '@/components/wrapper/MaxwidthWrapper'
 import { Calendar1, Utensils, Dumbbell, Clock, Flame } from 'lucide-react'

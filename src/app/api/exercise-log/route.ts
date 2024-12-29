@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth/next"
 import { getAuthSession } from '@/lib/auth/utils'
 import { db } from '@/lib/db'
 

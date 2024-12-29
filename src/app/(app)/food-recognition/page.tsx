@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,13 +16,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28']
 
 export default function FoodRecognitionPage() {
   const { data: session } = useSession()
-  const router = useRouter()
   const [foodInput, setFoodInput] = useState<string | File>('')
   const [inputType, setInputType] = useState<'text' | 'image'>('text')
   const [mealType, setMealType] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null)
-  const {toast} = useToast()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

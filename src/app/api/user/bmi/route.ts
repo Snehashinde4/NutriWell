@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/utils'
 import { db } from '@/lib/db'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // 1. Authentication check
     const session = await getAuthSession()
