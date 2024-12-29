@@ -116,9 +116,9 @@ model ExerciseLog {
 model FoodEntry {
   id           String     @id @default(cuid())
   userId       String
-  user         User       @relation(fields: [userId], references: [id])
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   dietaryLogId String?
-  dietaryLog   DietaryLog? @relation(fields: [dietaryLogId], references: [id])
+  dietaryLog   DietaryLog? @relation(fields: [dietaryLogId], references: [id], onDelete: Cascade)
   foodName     String
   calories     Int
   protein      Float?     // in grams

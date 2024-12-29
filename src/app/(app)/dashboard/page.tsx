@@ -13,6 +13,7 @@ import { UserHealthProfile } from "@/components/UserHealthProfile"
 import { ExerciseLogDialog } from "@/components/ExerciseLogDialog"
 import { RecentExerciseLog } from "@/components/RecentExerciseLog"
 import MaxWidthWrapper from '@/components/wrapper/MaxwidthWrapper'
+import { getGreeting } from '@/lib/utils'
 
 const features = [
   {
@@ -115,15 +116,6 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const getGreeting = (email: string | null | undefined) => {
-    const emailGreetings: Record<string, string> = {
-      'snehashindee.04@gmail.com': 'Ayee Chiknii 🫦',
-      'snehaashinde04@gmail.com': 'Ayee Chiknii 🫦',
-      'shreya.svg19@gmail.com': 'Ayeee Chaprii 🌈',
-    };
-
-    return email ? emailGreetings[email] || null : null;
-  };
 
   return (
     <MaxWidthWrapper className="py-10">
