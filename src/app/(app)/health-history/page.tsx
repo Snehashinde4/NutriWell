@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from '@/hooks/use-toast'
 import MaxWidthWrapper from '@/components/wrapper/MaxwidthWrapper'
 import { Calendar1, Utensils, Dumbbell, Clock, Flame } from 'lucide-react'
+import { DayProps } from 'react-day-picker'
 
 interface DailyLog {
   date: string
@@ -104,18 +105,20 @@ export default function HistoryPage() {
     }
   }
 
-  const getDayContent = (day: Date) => {
-    const formattedDate = format(day, 'yyyy-MM-dd')
+  const CustomDay = (props: DayProps) => {
+    const formattedDate = format(props.date, 'yyyy-MM-dd')
     const log = dailyLogs.find(log => log.date === formattedDate)
-    if (log) {
-      return (
-        <div className="flex flex-col items-center">
-          <div className="text-xs font-semibold">{day.getDate()}</div>
-          <div className="text-xs text-green-600">{log.dietaryLogs.length + log.exerciseLogs.length}</div>
-        </div>
-      )
-    }
-    return day.getDate()
+    
+    return (
+      <div className="flex flex-col items-center w-full">
+        <div className="text-xs font-semibold">{props.date.getDate()}</div>
+        {log && (
+          <div className="text-xs text-green-600">
+            {log.dietaryLogs.length + log.exerciseLogs.length}
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -137,7 +140,9 @@ export default function HistoryPage() {
                   }
                 }}
                 className="rounded-md border"
-                dayContent={getDayContent}
+                components={{
+                  Day: CustomDay
+                }}
               />
             </div>
             <div className="flex-1">
