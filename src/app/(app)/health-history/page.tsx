@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from '@/hooks/use-toast'
 import MaxWidthWrapper from '@/components/wrapper/MaxwidthWrapper'
 import { Calendar1, Utensils, Dumbbell, Clock, Flame } from 'lucide-react'
-import { DayProps } from 'react-day-picker'
 
 interface DailyLog {
   date: string
