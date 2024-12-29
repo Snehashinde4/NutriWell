@@ -4,8 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 import { redirect } from "next/navigation";
 import { db } from "../db";
 
-import type { User } from 'next-auth'
-
 type UserId = string
 
 declare module 'next-auth/jwt' {
@@ -14,20 +12,12 @@ declare module 'next-auth/jwt' {
   }
 }
 
-declare module 'next-auth' {
-  interface Session {
-    user: User & {
-      id: UserId
-    }
-  }
-}
-
 export type AuthSession = {
   session: {
     user: {
       id: string;
-      name: string;
-      email: string;
+      name?: string;
+      email?: string;
     };
   } | null;
 };

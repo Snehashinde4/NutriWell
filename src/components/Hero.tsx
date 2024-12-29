@@ -6,6 +6,7 @@ import { ArrowRight, Apple, Calculator, History, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import MaxWidthWrapper from './wrapper/MaxwidthWrapper'
+import Image from 'next/image'
 
 const features = [
   {
@@ -141,10 +142,12 @@ const Hero = () => {
             {/* Add your app screenshots or relevant images here */}
             {/* Example: */}
             <div className="col-span-12 row-span-4 relative rounded-2xl overflow-hidden shadow-xl">
-              <img
-                src="/placeholder.svg?height=400&width=600"
+              <Image
+                src="/landing.png"
                 alt="App Dashboard"
-                className="w-full h-full object-cover"
+                className="contain "
+                width={600}
+                height={'400'}
               />
             </div>
             {/* Add more grid items for additional screenshots */}
