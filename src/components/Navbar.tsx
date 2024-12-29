@@ -1,18 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import MaxWidthWrapper from './wrapper/MaxwidthWrapper'
 import { buttonVariants } from './Button1'
 
-const Navbar = () => {
+interface AuthSession {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+  expires?: string;
+}
+
+interface NavbarProps {
+  session: AuthSession | null;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ session }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
+
+  const navigationItems = session?.user
+    ? [
+        { name: 'Food Recognition', href: '/food-recognition' },
+        { name: 'BMI Calculator', href: '/bmi-calculator' },
+        { name: 'Health History', href: '/health-history' },
+        { name: 'AI Suggestions', href: '/ai-suggestions' },
+      ]
+    : [
+        { name: 'Features', href: '#features' },
+        { name: 'Benefits', href: '#benefits' },
+        { name: 'About', href: '#about' },
+      ]
 
   return (
     <nav className="bg-white shadow-sm">
@@ -26,41 +51,56 @@ const Navbar = () => {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="#features" className="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
-                Features
-              </Link>
-              <Link href="#benefits" className="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
-                Benefits
-              </Link>
-              <Link href="#about" className="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
-                About
-              </Link>
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </div>
 
           <div className="hidden md:block">
             <div className="flex items-center space-x-4">
-              <Link
-                href="/sign-in"
-                className={buttonVariants({
-                  size: "lg",
-                  className:
-                    "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
-                })}
-              >
-                Login
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-zinc-300" />
-              <Link
-                href="/sign-up"
-                className={buttonVariants({
-                  size: "lg",
-                  className:
-                    "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-green-600 border border-green-600  transition-colors rounded-md",
-                })}
-              >
-                Sign Up
-              </Link>
+              {session?.user ? (
+                <Link
+                  href="/dashboard"
+                  className={buttonVariants({
+                    size: "lg",
+                    className:
+                      "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
+                  })}
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className={buttonVariants({
+                      size: "lg",
+                      className:
+                        "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
+                    })}
+                  >
+                    Login
+                  </Link>
+                  <div className="hidden sm:block h-6 w-px bg-zinc-300" />
+                  <Link
+                    href="/sign-up"
+                    className={buttonVariants({
+                      size: "lg",
+                      className:
+                        "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-green-600 border border-green-600 transition-colors rounded-md",
+                    })}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -83,42 +123,55 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="#features" className="text-gray-600 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium">
-              Features
-            </Link>
-            <Link href="#benefits" className="text-gray-600 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium">
-              Benefits
-            </Link>
-            <Link href="#about" className="text-gray-600 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium">
-              About
-            </Link>
+            {navigationItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-gray-600 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+              >
+                {item.name}
+              </Link>
+            ))}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="px-2 space-y-1">
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/sign-in"
-                  className={buttonVariants({
-                    size: "lg",
-                    className:
-                      "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
-                  })}
-                >
-                  Login
-                </Link>
-                <div className="hidden sm:block h-6 w-px bg-zinc-300" />
-                <Link
-                  href="/sign-up"
-                  className={buttonVariants({
-                    size: "lg",
-                    className:
-                      "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-green-600 border border-green-600  transition-colors rounded-md",
-                  })}
-                >
-                  Sign Up
-                </Link>
+              <div className="flex flex-col space-y-2">
+                {session?.user ? (
+                  <Link
+                    href="/dashboard"
+                    className={buttonVariants({
+                      size: "lg",
+                      className:
+                        "flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
+                    })}
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/sign-in"
+                      className={buttonVariants({
+                        size: "lg",
+                        className:
+                          "flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md",
+                      })}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/sign-up"
+                      className={buttonVariants({
+                        size: "lg",
+                        className:
+                          "flex items-center justify-center px-4 py-2 text-sm font-medium text-green-600 border border-green-600 transition-colors rounded-md",
+                      })}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
-
             </div>
           </div>
         </div>
@@ -128,5 +181,4 @@ const Navbar = () => {
 }
 
 export default Navbar
-
 
