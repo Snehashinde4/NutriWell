@@ -39,6 +39,12 @@ const features = [
     description: 'Get personalized health tips',
     href: '/ai-suggestions'
   },
+  { 
+    icon: Dumbbell, 
+    title: 'Workout Recommendations', 
+    description: 'Get personalized workout plans',
+    href: '/workout-recommendations'
+  },
 ]
 
 export default function DashboardPage() {
@@ -116,7 +122,7 @@ export default function DashboardPage() {
           Welcome back, {session?.user?.name || 'User'}!
         </motion.h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <UserHealthProfile />
           </motion.div>
