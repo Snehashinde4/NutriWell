@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -10,27 +10,21 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/use-toast'
-import { UpdateProfile } from '@/app/api/actions/profile'
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  age: z.coerce.number().min(1, {
+  age: z.number().min(1, {
     message: "Age must be at least 1.",
   }).max(120, {
     message: "Age must be less than 120.",
-  }),
-  height: z.coerce.number().positive({
+  }).nullable(),
+  height: z.number().positive({
     message: "Height must be a positive number.",
-  }),
-  weight: z.coerce.number().positive({
+  }).nullable(),
+  weight: z.number().positive({
     message: "Weight must be a positive number.",
-  }),
+  }).nullable(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   activityLevel: z.enum([
     'SEDENTARY',
@@ -39,15 +33,15 @@ const formSchema = z.object({
     'VERY_ACTIVE',
     'EXTREMELY_ACTIVE'
   ]),
-  weeklyExercise: z.coerce.number().min(0, {
+  weeklyExercise: z.number().min(0, {
     message: "Weekly exercise cannot be negative.",
   }).max(30, {
     message: "Weekly exercise cannot exceed 30 hours.",
-  }),
-  targetWeight: z.coerce.number().positive({
+  }).nullable(),
+  targetWeight: z.number().positive({
     message: "Target weight must be a positive number.",
-  }).optional(),
-  healthGoals: z.array(z.string()).default([]),
+  }).nullable(),
+  healthGoals: z.array(z.string()).optional(),
 })
 
 const healthGoalOptions = [
@@ -61,64 +55,97 @@ const healthGoalOptions = [
 interface UpdateProfileDialogProps {
   isOpen: boolean
   onClose: () => void
-  initialData: z.infer<typeof formSchema>
 }
 
-export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProfileDialogProps) {
-  const { toast } = useToast()
+export function UpdateProfileDialog({ isOpen, onClose }: UpdateProfileDialogProps) {
+  const { data: session } = useSession()
   const [step, setStep] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const [isLoading, setIsLoading] = useState(true)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ...initialData,
-      healthGoals: initialData.healthGoals || [],
+      age: null,
+      height: null,
+      weight: null,
+      gender: undefined,
+      activityLevel: 'SEDENTARY',
+      weeklyExercise: null,
+      targetWeight: null,
+      healthGoals: [],
     },
   })
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchHealthProfile = async () => {
+      if (session?.user?.id) {
+        try {
+          const response = await fetch(`/api/user/health-profile?userId=${session.user.id}`)
+          if (response.ok) {
+            const data = await response.json()
+            form.reset(data)
+          } else {
+            throw new Error('Failed to fetch health profile')
+          }
+        } catch (error) {
+          console.error('Error fetching health profile:', error)
+          toast({
+            title: "Error",
+            description: "Failed to load health profile. Please try again.",
+            variant: "destructive",
+          })
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    if (isOpen) {
+      fetchHealthProfile()
+    }
+  }, [isOpen, session, form])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (step < steps.length - 1) {
+      setStep(step + 1);
+      return;
+    }
+
     try {
-      setIsSubmitting(true)
+      const response = await fetch('/api/user/health-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      })
 
-      const profileData = {
-        age: values.age,
-        height: values.height,
-        weight: values.weight,
-        gender: values.gender || null, // Convert undefined to null
-        activityLevel: values.activityLevel,
-        weeklyExercise: values.weeklyExercise,
-        targetWeight: values.targetWeight || null, // Convert undefined to null
-        healthGoals: values.healthGoals,
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
       }
 
-      const response = await UpdateProfile(profileData)
-
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to update profile')
-      }
+      const updatedProfile = await response.json()
+      console.log('Updated profile:', updatedProfile)
 
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       })
-
       onClose()
     } catch (error) {
+      console.error('Error updating profile:', error)
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update profile",
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
   const steps = [
     {
       title: "Personal Information",
-      fields: ["name", "email", "age", "gender"]
+      fields: ["age", "gender"]
     },
     {
       title: "Physical Information",
@@ -132,63 +159,40 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
 
   const currentStepFields = steps[step].fields
 
-  const canProceed = () => {
-    const currentFields = steps[step].fields
-    return currentFields.every(field => {
-      const fieldState = form.getFieldState(field as keyof z.infer<typeof formSchema>)
-      return !fieldState.invalid
-    })
+  if (isLoading) {
+    return null // Or a loading spinner
   }
 
-  const handleNext = () => {
-    if (canProceed()) {
-      setStep(step + 1)
-    } else {
-      // Trigger validation for current step fields
-      steps[step].fields.forEach(field => {
-        form.trigger(field as keyof z.infer<typeof formSchema>)
-      })
-    }
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderNumberField = (field: any, onChange: (value: number | null) => void) => (
+    <Input
+      {...field}
+      type="number"
+      value={field.value ?? ''} // Use empty string when null
+      onChange={(e) => {
+        const value = e.target.value === '' ? null : Number(e.target.value)
+        onChange(value)
+      }}
+    />
+  )
+
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setStep(0);
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-green-600">{steps[step].title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {currentStepFields.includes("name") && (
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {currentStepFields.includes("email") && (
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
             {currentStepFields.includes("age") && (
               <FormField
                 control={form.control}
@@ -197,13 +201,14 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                   <FormItem>
                     <FormLabel>Age</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      {renderNumberField(field, field.onChange)}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             {currentStepFields.includes("gender") && (
               <FormField
                 control={form.control}
@@ -211,7 +216,10 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gender</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || undefined}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your gender" />
@@ -228,6 +236,7 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                 )}
               />
             )}
+
             {currentStepFields.includes("height") && (
               <FormField
                 control={form.control}
@@ -236,13 +245,14 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                   <FormItem>
                     <FormLabel>Height (cm)</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      {renderNumberField(field, field.onChange)}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             {currentStepFields.includes("weight") && (
               <FormField
                 control={form.control}
@@ -251,13 +261,14 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                   <FormItem>
                     <FormLabel>Weight (kg)</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      {renderNumberField(field, field.onChange)}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             {currentStepFields.includes("targetWeight") && (
               <FormField
                 control={form.control}
@@ -266,13 +277,14 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                   <FormItem>
                     <FormLabel>Target Weight (kg)</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      {renderNumberField(field, field.onChange)}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             {currentStepFields.includes("activityLevel") && (
               <FormField
                 control={form.control}
@@ -280,7 +292,10 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Activity Level</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your activity level" />
@@ -299,6 +314,7 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                 )}
               />
             )}
+
             {currentStepFields.includes("weeklyExercise") && (
               <FormField
                 control={form.control}
@@ -307,7 +323,7 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
                   <FormItem>
                     <FormLabel>Weekly Exercise (hours)</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      {renderNumberField(field, field.onChange)}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -366,33 +382,16 @@ export function UpdateProfileDialog({ isOpen, onClose, initialData }: UpdateProf
             )}
             <div className="flex justify-between space-x-2">
               {step > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setStep(step - 1)}
-                  disabled={isSubmitting}
-                >
+                <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
                   Previous
                 </Button>
               )}
-              {step < steps.length - 1 ? (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !form.formState.isValid}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {isSubmitting ? "Saving..." : "Save Changes"}
-                </Button>
-              )}
+              <Button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {step < steps.length - 1 ? "Next" : "Save Changes"}
+              </Button>
             </div>
           </form>
         </Form>

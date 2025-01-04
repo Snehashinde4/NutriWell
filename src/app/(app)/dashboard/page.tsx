@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Apple, Calculator, History, Brain, User, Dumbbell } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UpdateProfileDialog } from "@/components/UpdateProfileDialog"
 import { AnalyticsChart } from "@/components/AnalyticsChart"
@@ -13,30 +13,29 @@ import { UserHealthProfile } from "@/components/UserHealthProfile"
 import { ExerciseLogDialog } from "@/components/ExerciseLogDialog"
 import { RecentExerciseLog } from "@/components/RecentExerciseLog"
 import MaxWidthWrapper from '@/components/wrapper/MaxwidthWrapper'
-import { getGreeting } from '@/lib/utils'
 
 const features = [
-  {
-    icon: Apple,
-    title: 'Food Recognition',
+  { 
+    icon: Apple, 
+    title: 'Food Recognition', 
     description: 'Analyze your meals with AI',
     href: '/food-recognition'
   },
-  {
-    icon: Calculator,
-    title: 'BMI Calculator',
+  { 
+    icon: Calculator, 
+    title: 'BMI Calculator', 
     description: 'Calculate and track your BMI',
     href: '/bmi-calculator'
   },
-  {
-    icon: History,
-    title: 'Health History',
+  { 
+    icon: History, 
+    title: 'Health History', 
     description: 'View your health journey',
     href: '/health-history'
   },
-  {
-    icon: Brain,
-    title: 'AI Suggestions',
+  { 
+    icon: Brain, 
+    title: 'AI Suggestions', 
     description: 'Get personalized health tips',
     href: '/ai-suggestions'
   },
@@ -46,19 +45,6 @@ export default function DashboardPage() {
   const { data: session } = useSession()
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
   const [recentExercise, setRecentExercise] = useState(null)
-
-  // Mock data for the health profile
-  const mockHealthProfile = {
-    age: 30,
-    height: 175,
-    weight: 70,
-    gender: 'Male',
-    activityLevel: 'MODERATE',
-    weeklyExercise: 3,
-    bmi: 22.9,
-    targetWeight: 68,
-    healthGoals: ['Lose Weight', 'Improve Fitness', 'Eat Healthier']
-  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -116,7 +102,6 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [])
 
-
   return (
     <MaxWidthWrapper className="py-10">
       <motion.div
@@ -124,21 +109,16 @@ export default function DashboardPage() {
         animate="visible"
         variants={containerVariants}
       >
-        <motion.h1
+        <motion.h1 
           className="text-3xl font-bold text-green-600 mb-6"
           variants={itemVariants}
         >
-          Welcome back,{' '}
-          {getGreeting(session?.user?.email) ? (
-            <span className="text-green-600">{getGreeting(session?.user?.email)}</span>
-          ) : (
-            session?.user?.name || 'User'
-          )}
+          Welcome back, {session?.user?.name || 'User'}!
         </motion.h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <UserHealthProfile profile={mockHealthProfile} />
+            <UserHealthProfile />
           </motion.div>
 
           <motion.div variants={itemVariants}>
@@ -166,8 +146,8 @@ export default function DashboardPage() {
                 <CardDescription>Manage your personal information</CardDescription>
               </CardHeader>
               <CardFooter>
-                <Button
-                  onClick={() => setIsProfileDialogOpen(true)}
+                <Button 
+                  onClick={() => setIsProfileDialogOpen(true)} 
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
                   Update Profile
@@ -196,7 +176,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <motion.div
+        <motion.div 
           variants={itemVariants}
           className="mt-12"
         >
@@ -212,21 +192,9 @@ export default function DashboardPage() {
         </motion.div>
       </motion.div>
 
-      <UpdateProfileDialog
-        isOpen={isProfileDialogOpen}
-        onClose={() => setIsProfileDialogOpen(false)}
-        initialData={{
-          name: session?.user?.name || '',
-          email: session?.user?.email || '',
-          age: mockHealthProfile.age,
-          height: mockHealthProfile.height,
-          weight: mockHealthProfile.weight,
-          gender: 'MALE',
-          activityLevel: 'MODERATE',
-          weeklyExercise: mockHealthProfile.weeklyExercise,
-          targetWeight: mockHealthProfile.targetWeight,
-          healthGoals: mockHealthProfile.healthGoals,
-        }}
+      <UpdateProfileDialog 
+        isOpen={isProfileDialogOpen} 
+        onClose={() => setIsProfileDialogOpen(false)} 
       />
     </MaxWidthWrapper>
   )

@@ -15,42 +15,42 @@ export default function BMIPage() {
   const { data: session } = useSession()
   const [currentBMI, setCurrentBMI] = useState<number | null>(null)
   const [calculatedBMI, setCalculatedBMI] = useState<number | null>(null)
-  const {toast} = useToast()
+  const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(true)
 
-useEffect(() => {
-  const fetchCurrentBMI = async () => {
-    if (session?.user?.id) {
-      setIsLoading(true)
-      try {
-        const response = await fetch(`/api/user/bmi?userId=${session.user.id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setCurrentBMI(data.bmi)
-        } else {
+  useEffect(() => {
+    const fetchCurrentBMI = async () => {
+      if (session?.user?.id) {
+        setIsLoading(true)
+        try {
+          const response = await fetch(`/api/user/bmi?userId=${session.user.id}`)
+          if (response.ok) {
+            const data = await response.json()
+            setCurrentBMI(data.bmi)
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to fetch current BMI",
+              variant: "destructive",
+            })
+          }
+        } catch (error) {
+          console.error('Error fetching BMI:', error)
           toast({
             title: "Error",
-            description: "Failed to fetch current BMI",
+            description: "An unexpected error occurred",
             variant: "destructive",
           })
+        } finally {
+          setIsLoading(false)
         }
-      } catch (error) {
-        console.error('Error fetching BMI:', error)
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
       }
     }
-  }
-  fetchCurrentBMI()
-}, [session])
+    fetchCurrentBMI()
+  }, [session])
 
-  if(isLoading) return <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+  if (isLoading) return <Loader2 className="h-8 w-8 animate-spin text-green-500" />
 
   return (
     <MaxWidthWrapper className="py-10">

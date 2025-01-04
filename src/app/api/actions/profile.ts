@@ -5,19 +5,42 @@ import { UpdateProfileResponse } from "@/types"
 import { db } from "@/lib/db"
 import { getAuthSession } from "@/lib/auth/utils"
 
-const profileSchema = z.object({
-  age: z.number(),
-  height: z.number(),
-  weight: z.number(),
-  gender: z.string().nullable(),
-  activityLevel: z.string(),
-  weeklyExercise: z.number(),
-  targetWeight: z.number().nullable(),
-  healthGoals: z.array(z.string()),
+const formSchema = z.object({
+  age: z.number().min(1, {
+    message: "Age must be at least 1.",
+  }).max(120, {
+    message: "Age must be less than 120.",
+  }),
+  height: z.number().positive({
+    message: "Height must be a positive number.",
+  }),
+  weight: z.number().positive({
+    message: "Weight must be a positive number.",
+  }),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  activityLevel: z.enum([
+    'SEDENTARY',
+    'LIGHT',
+    'MODERATE',
+    'VERY_ACTIVE',
+    'EXTREMELY_ACTIVE'
+  ]),
+  weeklyExercise: z.number().min(0, {
+    message: "Weekly exercise cannot be negative.",
+  }).max(30, {
+    message: "Weekly exercise cannot exceed 30 hours.",
+  }).refine((val) => !isNaN(val), {
+    message: "Please enter a valid number.",
+  }),
+  targetWeight: z.number().positive({
+    message: "Target weight must be a positive number.",
+  }).optional(),
+  healthGoals: z.array(z.string()).optional(),
 })
 
+
 export async function UpdateProfile(
-  data: z.infer<typeof profileSchema>
+  data: z.infer<typeof formSchema>
 ): Promise<UpdateProfileResponse> {
   try {
     const session = await getAuthSession()
@@ -26,6 +49,7 @@ export async function UpdateProfile(
       return { success: false, error: 'Unauthorized' }
     }
 
+    console.log(data)
     // Calculate BMI
     const bmi = data.weight / Math.pow(data.height / 100, 2)
 
