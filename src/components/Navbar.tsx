@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Menu, X, Sun, Moon } from 'lucide-react'
 import MaxWidthWrapper from './wrapper/MaxwidthWrapper'
 import { buttonVariants } from './Button1'
+import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface AuthSession {
   user?: {
@@ -22,6 +24,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const router = useRouter();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -29,22 +32,26 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode)
-    // Toggle dark mode class on document root
     document.documentElement.classList.toggle('dark')
+  }
+
+  const handleSignOut = () => {
+    signOut();
+    router.push("/");
   }
 
   const navigationItems = session?.user
     ? [
-        { name: 'Food Recognition', href: '/food-recognition' },
-        { name: 'BMI Calculator', href: '/bmi-calculator' },
-        { name: 'Health History', href: '/health-history' },
-        { name: 'AI Suggestions', href: '/ai-suggestions' },
-      ]
+      { name: 'Food Recognition', href: '/food-recognition' },
+      { name: 'BMI Calculator', href: '/bmi-calculator' },
+      { name: 'Health History', href: '/health-history' },
+      { name: 'AI Suggestions', href: '/ai-suggestions' },
+    ]
     : [
-        { name: 'Features', href: '#features' },
-        { name: 'Benefits', href: '#benefits' },
-        { name: 'About', href: '#about' },
-      ]
+      { name: 'Features', href: '#features' },
+      { name: 'Benefits', href: '#benefits' },
+      { name: 'About', href: '#about' },
+    ]
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
@@ -95,6 +102,16 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   >
                     Dashboard
                   </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className={buttonVariants({
+                      size: "lg",
+                      className:
+                        "hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-colors rounded-md",
+                    })}
+                  >
+                    Sign Out
+                  </button>
                 </>
               ) : (
                 <>
@@ -139,83 +156,9 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           </div>
         </div>
       </MaxWidthWrapper>
-
-      {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-          <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-            <div className="px-2 space-y-1">
-              <div className="flex flex-col space-y-2">
-                {session?.user ? (
-                  <>
-                    <button
-                      onClick={toggleTheme}
-                      className="flex items-center justify-center p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 focus:outline-none"
-                    >
-                      {isDarkMode ? (
-                        <>
-                          <Sun className="h-5 w-5 mr-2" />
-                          <span>Light Mode</span>
-                        </>
-                      ) : (
-                        <>
-                          <Moon className="h-5 w-5 mr-2" />
-                          <span>Dark Mode</span>
-                        </>
-                      )}
-                    </button>
-                    <Link
-                      href="/dashboard"
-                      className={buttonVariants({
-                        size: "lg",
-                        className:
-                          "flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-colors rounded-md",
-                      })}
-                    >
-                      Dashboard
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/sign-in"
-                      className={buttonVariants({
-                        size: "lg",
-                        className:
-                          "flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-colors rounded-md",
-                      })}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/sign-up"
-                      className={buttonVariants({
-                        size: "lg",
-                        className:
-                          "flex items-center justify-center px-4 py-2 text-sm font-medium text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 transition-colors rounded-md",
-                      })}
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   )
 }
 
 export default Navbar
+
